@@ -3,7 +3,7 @@
 import { useState } from "react";
 import Image from "next/image";
 import { motion, AnimatePresence } from "framer-motion";
-import img from "@/assets/img-2 (1).jpg";
+import img from "@/assets/doctorone.png";
 
 const slides = [
   {

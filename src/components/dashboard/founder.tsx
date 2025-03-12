@@ -1,5 +1,5 @@
 import Image from "next/image";
-import founder from "@/assets/img-2 (2).jpg"
+import founder from "@/assets/doctortwo.png"
 
 export const Founder = () => {
   return (

@@ -32,7 +32,7 @@ export default function PoliciesPage() {
             <Link
               key={item.label}
               href={item.href}
-              className="flex items-center justify-between p-4 rounded-lg hover:bg-emerald-50 transition duration-200"
+              className="flex items-center justify-between p-4 rounded-lg hover:bg-gray-100 transition duration-200"
             >
               <span className="text-md font-medium text-gray-700">
                 {item.label}

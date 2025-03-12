@@ -3,7 +3,7 @@
 import { useState } from "react";
 import { Pencil, X } from "lucide-react";
 import Image from "next/image";
-import profile from "@/assets/patient2.jpg";
+import profile from "@/assets/patient.png";
 
 export default function ProfileCard() {
   const [isModalOpen, setIsModalOpen] = useState(false);

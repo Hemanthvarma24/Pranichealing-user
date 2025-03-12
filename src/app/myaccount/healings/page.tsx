@@ -23,9 +23,11 @@ export default function HealingsPage() {
         <div className="p-4">
           <HealingsList />
         </div>
-
+       
         <div className="p-4 sticky bottom-16 bg-white">
-          <Button className="w-full bg-[#4ead91] text-white hover:bg-[#3d9c80] font-medium">Book Appointment</Button>
+        <Link href="//appointment">
+        <Button className="w-full bg-[#4ead91] text-white hover:bg-[#3d9c80] font-medium">Book Appointment</Button>
+          </Link>
         </div>
         <BottomNav />
       </div>
