@@ -1,21 +1,22 @@
-"use client"
+"use client";
 
-import { Swiper, SwiperSlide } from 'swiper/react';
-import 'swiper/css';
+import { Swiper, SwiperSlide } from "swiper/react";
+import "swiper/css";
 import { Leaf, Heart } from "lucide-react";
 
 export function PurposeSection() {
   return (
-    <div className="px-4 mb-14">
-     <div className="flex items-center justify-between mb-6">
-  <div>
-    <h2 className="text-xl font-semibold text-black">Purpose of</h2>
-    <h1 className="text-xl font-bold text-emerald-600">Pranic Healing</h1>
-  </div>
-  <button className="text-sm pt-4 text-black font-medium">View All</button>
-</div>
+    <div className="px-4 mb-14 pb-6 overflow-hidden relative">
+      {/* Header */}
+      <div className="flex items-center justify-between mb-6">
+        <div>
+          <h2 className="text-xl font-semibold text-black">Purpose of</h2>
+          <h1 className="text-xl font-bold text-emerald-600">Pranic Healing</h1>
+        </div>
+        <button className="text-sm pt-4 text-black font-medium">View All</button>
+      </div>
 
-
+      {/* Swiper Section */}
       <Swiper
         spaceBetween={16}
         slidesPerView={1.2}
@@ -25,8 +26,8 @@ export function PurposeSection() {
         className="w-full"
       >
         <SwiperSlide>
-          <div className="flex items-center p-4 border rounded-xl shadow-sm">
-            <div className="w-12 h-12 flex items-center justify-center bg-emerald-100 rounded-lg mr-4">
+          <div className="relative z-10 flex items-center p-4 border rounded-xl shadow-sm bg-white">
+            <div className="w-12 h-12 flex items-center justify-center  rounded-lg mr-4">
               <Leaf className="w-8 h-8 text-emerald-600" />
             </div>
             <div>
@@ -35,14 +36,17 @@ export function PurposeSection() {
             </div>
           </div>
         </SwiperSlide>
+
         <SwiperSlide>
-          <div className="flex items-center p-4 border rounded-xl shadow-sm">
-            <div className="w-12 h-12 flex items-center justify-center bg-emerald-100 rounded-lg mr-4">
+          <div className="relative z-10 flex items-center p-4 border rounded-xl shadow-sm bg-white">
+            <div className="w-12 h-12 flex items-center justify-center  rounded-lg mr-4">
               <Heart className="w-8 h-8 text-emerald-600" />
             </div>
             <div>
               <h3 className="font-semibold text-lg text-gray-800">Healing</h3>
-              <p className="text-sm text-gray-600">Basic Pranic Healing, Advanced Pranic Healing...</p>
+              <p className="text-sm text-gray-600">
+                Basic Pranic Healing, Advanced Pranic Healing...
+              </p>
             </div>
           </div>
         </SwiperSlide>

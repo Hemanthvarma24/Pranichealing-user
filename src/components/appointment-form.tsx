@@ -2,8 +2,8 @@
 
 import type React from "react"
 
-import { useState } from "react"
-import { CalendarIcon, CheckCircle } from "lucide-react"
+import { useState, useRef } from "react"
+import { CalendarIcon, CheckCircle, Upload } from "lucide-react"
 import { Button } from "@/components/ui/button"
 import { Calendar } from "@/components/ui/calendar"
 import { Input } from "@/components/ui/input"
@@ -14,7 +14,6 @@ import { Textarea } from "@/components/ui/textarea"
 import { Checkbox } from "@/components/ui/checkbox"
 import { Popover, PopoverContent, PopoverTrigger } from "@/components/ui/popover"
 import { format } from "date-fns"
-// import { CommandEmpty, CommandGroup, CommandInput, CommandItem, CommandList } from "@/components/ui/command"
 
 const countryCodes = [
   { value: "+1", label: "United States (+1)" },
@@ -51,10 +50,16 @@ interface FormData {
   problems: string[]
   medicalConditions: Record<string, string>
   generalCondition: string
+  patientPhoto: File | null
+  photoPreview: string | null
   declarations: Record<string, boolean>
 }
 
-export default function PatientForm() {
+export default function PatientRegistration() {
+  const [showForm, setShowForm] = useState(false)
+  const fileInputRef = useRef<HTMLInputElement>(null)
+  const today = new Date()
+
   const [formData, setFormData] = useState<FormData>({
     patientName: "",
     dateOfBirth: undefined,
@@ -74,6 +79,8 @@ export default function PatientForm() {
     problems: [],
     medicalConditions: {},
     generalCondition: "",
+    patientPhoto: null,
+    photoPreview: null,
     declarations: {
       declaration1: false,
       declaration2: false,
@@ -101,6 +108,31 @@ export default function PatientForm() {
     }
   }
 
+  const handlePhotoUpload = (e: React.ChangeEvent<HTMLInputElement>) => {
+    if (e.target.files && e.target.files[0]) {
+      const file = e.target.files[0]
+      const reader = new FileReader()
+
+      reader.onload = (event) => {
+        if (event.target && event.target.result) {
+          setFormData({
+            ...formData,
+            patientPhoto: file,
+            photoPreview: event.target.result as string,
+          })
+        }
+      }
+
+      reader.readAsDataURL(file)
+    }
+  }
+
+  const triggerFileInput = () => {
+    if (fileInputRef.current) {
+      fileInputRef.current.click()
+    }
+  }
+
   const validateForm = () => {
     const newErrors: Record<string, string> = {}
 
@@ -117,6 +149,7 @@ export default function PatientForm() {
     if (!formData.address.state) newErrors["address.state"] = "State is required"
     if (!formData.address.pincode) newErrors["address.pincode"] = "Pincode is required"
     if (formData.problems.length === 0) newErrors.problems = "At least one problem must be selected"
+    if (!formData.patientPhoto) newErrors.patientPhoto = "Patient photo is required"
 
     setErrors(newErrors)
     return Object.keys(newErrors).length === 0
@@ -130,24 +163,53 @@ export default function PatientForm() {
     }
   }
 
+  if (!showForm) {
+    return (
+      <div className="min-h-screen flex items-center justify-center p-4 bg-white">
+        <div className="w-full max-w-md bg-white shadow-lg p-6 rounded-lg text-center">
+          <h1 className="text-2xl sm:text-3xl font-bold mb-4 sm:mb-6 text-gray-800">Patient Registration Portal</h1>
+      
+          <div className="space-y-4 sm:space-y-6 mb-6 sm:mb-8 text-gray-700">
+            <p className="text-base sm:text-lg">
+              Welcome to our patient registration system. This form will collect your personal information, medical
+              history, and contact details to provide you with the best possible care.
+            </p>
+      
+            <p className="text-base sm:text-lg">
+              Please ensure all information provided is accurate and up-to-date. Your information will be kept
+              confidential and secure in accordance with our privacy policy.
+            </p>
+          </div>
+      
+          <Button
+            onClick={() => setShowForm(true)}
+            className="w-full py-3 bg-[#4ead91] hover:bg-[#3d9c80] text-white font-semibold rounded-lg transition duration-200"
+          >
+            Continue to Registration
+          </Button>
+        </div>
+      </div>
+    )
+  }
+
   return (
-    <div className="min-h-screen flex items-center justify-center p-2 mb-12 pt-[70px]">
-      <div className="max-w-2xl w-full p-8  rounded-lg shadow-md">
-        <h1 className="text-2xl font-bold mb-6 text-center">Patient Registration</h1>
-        <form className="space-y-5" onSubmit={handleSubmit}>
+    <div className="min-h-screen flex items-center justify-center p-3 mb-[80px] pt-[80px]">
+      <div className="w-full max-w-md p-4 rounded-lg ">
+        <h1 className="text-xl sm:text-2xl font-bold mb-4 sm:mb-6 text-center">Patient Registration</h1>
+        <form className="space-y-4" onSubmit={handleSubmit}>
           <div>
-            <Label htmlFor="patientName">Patient Name</Label>
+            <Label htmlFor="patientName" className="text-sm font-medium">Patient Name</Label>
             <Input
               id="patientName"
               value={formData.patientName}
               onChange={(e) => setFormData({ ...formData, patientName: e.target.value })}
-              className={`mt-1  focus:border-[#4ead91] ${errors.patientName ? "border-red-500" : ""}`}
+              className={`mt-1 focus:border-[#4ead91] ${errors.patientName ? "border-red-500" : ""}`}
             />
-            {errors.patientName && <p className="text-red-500 text-sm mt-1">{errors.patientName}</p>}
+            {errors.patientName && <p className="text-red-500 text-xs mt-1">{errors.patientName}</p>}
           </div>
 
           <div>
-            <Label>Date of Birth</Label>
+            <Label className="text-sm font-medium">Date of Birth</Label>
             <Popover>
               <PopoverTrigger asChild>
                 <Button
@@ -157,23 +219,30 @@ export default function PatientForm() {
                   }`}
                 >
                   <span>{formData.dateOfBirth ? format(formData.dateOfBirth, "PPP") : "Pick a date"}</span>
-                  <CalendarIcon className="h-5 w-5" />
+                  <CalendarIcon className="h-4 w-4" />
                 </Button>
               </PopoverTrigger>
-              <PopoverContent className="w-auto p-2">
-                <Calendar mode="single" selected={formData.dateOfBirth} onSelect={handleDateSelect} />
+              <PopoverContent className="w-auto p-0" align="center">
+                <Calendar 
+                  mode="single" 
+                  selected={formData.dateOfBirth} 
+                  onSelect={handleDateSelect} 
+                  disabled={{after: today}}
+                  initialFocus
+                  className="rounded-md border"
+                />
               </PopoverContent>
             </Popover>
-            {errors.dateOfBirth && <p className="text-red-500 text-sm mt-1">{errors.dateOfBirth}</p>}
+            {errors.dateOfBirth && <p className="text-red-500 text-xs mt-1">{errors.dateOfBirth}</p>}
           </div>
 
           <div>
-            <Label htmlFor="age">Age</Label>
+            <Label htmlFor="age" className="text-sm font-medium">Age</Label>
             <Input id="age" value={formData.age} disabled className="mt-1 bg-gray-50" />
           </div>
 
           <div>
-            <Label>Gender</Label>
+            <Label className="text-sm font-medium">Gender</Label>
             <RadioGroup
               className="flex space-x-4 mt-1"
               value={formData.gender}
@@ -181,81 +250,83 @@ export default function PatientForm() {
             >
               <div className="flex items-center">
                 <RadioGroupItem value="male" id="male" />
-                <Label htmlFor="male" className="ml-2">
+                <Label htmlFor="male" className="ml-2 text-sm">
                   Male
                 </Label>
               </div>
               <div className="flex items-center">
                 <RadioGroupItem value="female" id="female" />
-                <Label htmlFor="female" className="ml-2">
+                <Label htmlFor="female" className="ml-2 text-sm">
                   Female
                 </Label>
               </div>
             </RadioGroup>
-            {errors.gender && <p className="text-red-500 text-sm mt-1">{errors.gender}</p>}
+            {errors.gender && <p className="text-red-500 text-xs mt-1">{errors.gender}</p>}
           </div>
 
           <div>
-            <Label>Marital Status</Label>
+            <Label className="text-sm font-medium">Marital Status</Label>
             <Select onValueChange={(value) => setFormData({ ...formData, maritalStatus: value })}>
               <SelectTrigger className={`mt-1 focus:border-[#4ead91] ${errors.maritalStatus ? "border-red-500" : ""}`}>
                 <SelectValue placeholder="Select status" />
               </SelectTrigger>
-              <SelectContent>
+              <SelectContent position="popper" className="w-full">
                 <SelectItem value="single">Single</SelectItem>
                 <SelectItem value="married">Married</SelectItem>
                 <SelectItem value="divorced">Divorced</SelectItem>
               </SelectContent>
             </Select>
-            {errors.maritalStatus && <p className="text-red-500 text-sm mt-1">{errors.maritalStatus}</p>}
+            {errors.maritalStatus && <p className="text-red-500 text-xs mt-1">{errors.maritalStatus}</p>}
+          </div>
+
+          <div className="grid grid-cols-3 gap-2">
+            <div className="col-span-1">
+              <Label className="text-sm font-medium">Country Code</Label>
+              <Select
+                onValueChange={(value) => setFormData({ ...formData, countryCode: value })}
+                value={formData.countryCode}
+              >
+                <SelectTrigger className={`mt-1 focus:border-[#4ead91] ${errors.countryCode ? "border-red-500" : ""}`}>
+                  <SelectValue placeholder="Code" />
+                </SelectTrigger>
+                <SelectContent position="popper">
+                  {countryCodes.map((code) => (
+                    <SelectItem key={code.value} value={code.value}>
+                      {code.value}
+                    </SelectItem>
+                  ))}
+                </SelectContent>
+              </Select>
+              {errors.countryCode && <p className="text-red-500 text-xs mt-1">{errors.countryCode}</p>}
+            </div>
+
+            <div className="col-span-2">
+              <Label htmlFor="contactNumber" className="text-sm font-medium">Phone Number</Label>
+              <Input
+                id="contactNumber"
+                type="tel"
+                value={formData.contactNumber}
+                onChange={(e) => setFormData({ ...formData, contactNumber: e.target.value })}
+                className={`mt-1 focus:border-[#4ead91] ${errors.contactNumber ? "border-red-500" : ""}`}
+              />
+              {errors.contactNumber && <p className="text-red-500 text-xs mt-1">{errors.contactNumber}</p>}
+            </div>
           </div>
 
           <div>
-            <Label>Country Code</Label>
-            <Select
-              onValueChange={(value) => setFormData({ ...formData, countryCode: value })}
-              value={formData.countryCode}
-            >
-              <SelectTrigger className={`mt-1 focus:border-[#4ead91] ${errors.countryCode ? "border-red-500" : ""}`}>
-                <SelectValue placeholder="Select country code" />
-              </SelectTrigger>
-              <SelectContent>
-                {countryCodes.map((code) => (
-                  <SelectItem key={code.value} value={code.value}>
-                    {code.label}
-                  </SelectItem>
-                ))}
-              </SelectContent>
-            </Select>
-            {errors.countryCode && <p className="text-red-500 text-sm mt-1">{errors.countryCode}</p>}
-          </div>
-
-          <div>
-            <Label htmlFor="contactNumber">Contact Number</Label>
-            <Input
-              id="contactNumber"
-              type="tel"
-              value={formData.contactNumber}
-              onChange={(e) => setFormData({ ...formData, contactNumber: e.target.value })}
-              className={`mt-1  focus:border-[#4ead91] ${errors.contactNumber ? "border-red-500" : ""}`}
-            />
-            {errors.contactNumber && <p className="text-red-500 text-sm mt-1">{errors.contactNumber}</p>}
-          </div>
-
-          <div>
-            <Label htmlFor="email">Email</Label>
+            <Label htmlFor="email" className="text-sm font-medium">Email</Label>
             <Input
               id="email"
               type="email"
               value={formData.email}
               onChange={(e) => setFormData({ ...formData, email: e.target.value })}
-              className={`mt-1  focus:border-[#4ead91] ${errors.email ? "border-red-500" : ""}`}
+              className={`mt-1 focus:border-[#4ead91] ${errors.email ? "border-red-500" : ""}`}
             />
-            {errors.email && <p className="text-red-500 text-sm mt-1">{errors.email}</p>}
+            {errors.email && <p className="text-red-500 text-xs mt-1">{errors.email}</p>}
           </div>
 
           <div>
-            <Label>Address</Label>
+            <Label className="text-sm font-medium">Address</Label>
             <div className="space-y-2 mt-1">
               <Input
                 placeholder="Flat/Door No."
@@ -266,9 +337,9 @@ export default function PatientForm() {
                     address: { ...formData.address, flatNo: e.target.value },
                   })
                 }
-                className={`text-sm focus:border-[#4ead91] ${errors["address.flatNo"] ? "border-red-500" : ""}`}
+                className={`text-xs sm:text-sm focus:border-[#4ead91] ${errors["address.flatNo"] ? "border-red-500" : ""}`}
               />
-              {errors["address.flatNo"] && <p className="text-red-500 text-sm">{errors["address.flatNo"]}</p>}
+              {errors["address.flatNo"] && <p className="text-red-500 text-xs">{errors["address.flatNo"]}</p>}
               <Input
                 placeholder="Street"
                 value={formData.address.street}
@@ -278,35 +349,42 @@ export default function PatientForm() {
                     address: { ...formData.address, street: e.target.value },
                   })
                 }
-                className={`text-sm focus:border-[#4ead91] ${errors["address.street"] ? "border-red-500" : ""}`}
+                className={`text-xs sm:text-sm focus:border-[#4ead91] ${errors["address.street"] ? "border-red-500" : ""}`}
               />
-              {errors["address.street"] && <p className="text-red-500 text-sm">{errors["address.street"]}</p>}
-              <Input
-                placeholder="City"
-                value={formData.address.city}
-                onChange={(e) =>
-                  setFormData({
-                    ...formData,
-                    address: { ...formData.address, city: e.target.value },
-                  })
-                }
-                className={`text-sm focus:border-[#4ead91] ${errors["address.city"] ? "border-red-500" : ""}`}
-              />
-              {errors["address.city"] && <p className="text-red-500 text-sm">{errors["address.city"]}</p>}
-              <Input
-                placeholder="State"
-                value={formData.address.state}
-                onChange={(e) =>
-                  setFormData({
-                    ...formData,
-                    address: { ...formData.address, state: e.target.value },
-                  })
-                }
-                className={`text-sm hover:bg-gray-100 focus:border-[#4ead91] ${
-                  errors["address.state"] ? "border-red-500" : ""
-                }`}
-              />
-              {errors["address.state"] && <p className="text-red-500 text-sm">{errors["address.state"]}</p>}
+              {errors["address.street"] && <p className="text-red-500 text-xs">{errors["address.street"]}</p>}
+              
+              <div className="grid grid-cols-2 gap-2">
+                <div>
+                  <Input
+                    placeholder="City"
+                    value={formData.address.city}
+                    onChange={(e) =>
+                      setFormData({
+                        ...formData,
+                        address: { ...formData.address, city: e.target.value },
+                      })
+                    }
+                    className={`text-xs sm:text-sm focus:border-[#4ead91] ${errors["address.city"] ? "border-red-500" : ""}`}
+                  />
+                  {errors["address.city"] && <p className="text-red-500 text-xs">{errors["address.city"]}</p>}
+                </div>
+                <div>
+                  <Input
+                    placeholder="State"
+                    value={formData.address.state}
+                    onChange={(e) =>
+                      setFormData({
+                        ...formData,
+                        address: { ...formData.address, state: e.target.value },
+                      })
+                    }
+                    className={`text-xs sm:text-sm hover:bg-gray-100 focus:border-[#4ead91] ${
+                      errors["address.state"] ? "border-red-500" : ""
+                    }`}
+                  />
+                  {errors["address.state"] && <p className="text-red-500 text-xs">{errors["address.state"]}</p>}
+                </div>
+              </div>
               <Input
                 placeholder="Pincode"
                 value={formData.address.pincode}
@@ -316,14 +394,14 @@ export default function PatientForm() {
                     address: { ...formData.address, pincode: e.target.value },
                   })
                 }
-                className={`text-sm focus:border-[#4ead91] ${errors["address.pincode"] ? "border-red-500" : ""}`}
+                className={`text-xs sm:text-sm focus:border-[#4ead91] ${errors["address.pincode"] ? "border-red-500" : ""}`}
               />
-              {errors["address.pincode"] && <p className="text-red-500 text-sm">{errors["address.pincode"]}</p>}
+              {errors["address.pincode"] && <p className="text-red-500 text-xs">{errors["address.pincode"]}</p>}
             </div>
           </div>
 
           <div>
-            <Label>Problems</Label>
+            <Label className="text-sm font-medium">Problems</Label>
             <Select
               onValueChange={(value) => {
                 if (!formData.problems.includes(value)) {
@@ -338,7 +416,7 @@ export default function PatientForm() {
               <SelectTrigger className={`mt-1 focus:border-[#4ead91] ${errors.problems ? "border-red-500" : ""}`}>
                 <SelectValue placeholder="Select problems" />
               </SelectTrigger>
-              <SelectContent>
+              <SelectContent position="popper">
                 {problems.map((problem) => (
                   <SelectItem key={problem} value={problem}>
                     {problem}
@@ -349,7 +427,7 @@ export default function PatientForm() {
             {formData.problems.length > 0 && (
               <div className="mt-2 flex flex-wrap gap-2">
                 {formData.problems.map((problem) => (
-                  <div key={problem} className="px-2 py-1 rounded-full text-sm flex items-center">
+                  <div key={problem} className="px-2 py-1 bg-gray-100 rounded-full text-xs sm:text-sm flex items-center">
                     {problem}
                     <button
                       type="button"
@@ -359,7 +437,7 @@ export default function PatientForm() {
                           problems: formData.problems.filter((p) => p !== problem),
                         })
                       }
-                      className="ml-2 text-red-500 hover:text-red-700"
+                      className="ml-1 text-red-500 hover:text-red-700"
                     >
                       &times;
                     </button>
@@ -367,16 +445,16 @@ export default function PatientForm() {
                 ))}
               </div>
             )}
-            {errors.problems && <p className="text-red-500 text-sm mt-1">{errors.problems}</p>}
+            {errors.problems && <p className="text-red-500 text-xs mt-1">{errors.problems}</p>}
           </div>
 
           <div>
-            <Label>Medical Conditions</Label>
-            <div className="mt-1 space-y-4">
+            <Label className="text-sm font-medium">Medical Conditions</Label>
+            <div className="mt-1 space-y-3">
               {formData.problems.length > 0 ? (
                 formData.problems.map((problem, index) => (
-                  <div key={index} className="p-4 border border-gray-300 rounded-md">
-                    <Label className="block text-sm font-medium text-gray-700">{problem}</Label>
+                  <div key={index} className="p-3 border border-gray-300 rounded-md">
+                    <Label className="block text-xs sm:text-sm font-medium text-gray-700">{problem}</Label>
                     <Textarea
                       value={formData.medicalConditions[problem] || ""}
                       onChange={(e) =>
@@ -388,14 +466,14 @@ export default function PatientForm() {
                           },
                         })
                       }
-                      className="bg-white hover:bg-gray-100 focus:border-[#4ead91] mt-1"
-                      rows={3}
-                      placeholder={`Describe the condition related to "${problem}" here...`}
+                      className="bg-white hover:bg-gray-100 focus:border-[#4ead91] mt-1 text-xs sm:text-sm"
+                      rows={2}
+                      placeholder={`Describe condition for "${problem}"...`}
                     />
                   </div>
                 ))
               ) : (
-                <div className="p-4 border border-gray-300 rounded-md">
+                <div className="p-3 border border-gray-300 rounded-md">
                   <Textarea
                     value={formData.generalCondition}
                     onChange={(e) =>
@@ -404,8 +482,8 @@ export default function PatientForm() {
                         generalCondition: e.target.value,
                       })
                     }
-                    className="bg-white focus:border-[#4ead91]"
-                    rows={3}
+                    className="bg-white focus:border-[#4ead91] text-xs sm:text-sm"
+                    rows={2}
                     placeholder="Please describe your medical conditions here..."
                   />
                 </div>
@@ -414,8 +492,41 @@ export default function PatientForm() {
           </div>
 
           <div className="space-y-2">
+            <Label className="text-sm font-medium">Patient Photo</Label>
+            <div className="mt-1 flex flex-col items-center p-3 border-2 border-dashed border-gray-300 rounded-lg">
+              <input type="file" ref={fileInputRef} accept="image/*" onChange={handlePhotoUpload} className="hidden" />
+
+              {formData.photoPreview ? (
+                <div className="space-y-3 w-full flex flex-col items-center">
+                  <img
+                    src={formData.photoPreview || "/placeholder.svg"}
+                    alt="Patient"
+                    className="w-24 h-24 object-cover rounded-full border-4 border-[#4ead91]"
+                  />
+                  <Button type="button" variant="outline" onClick={triggerFileInput} className="text-xs">
+                    Change Photo
+                  </Button>
+                </div>
+              ) : (
+                <div className="space-y-2 flex flex-col items-center">
+                  <div className="p-3 rounded-full bg-gray-100">
+                    <Upload className="h-6 w-6 text-gray-500" />
+                  </div>
+                  <div className="text-center">
+                    <Button type="button" variant="outline" onClick={triggerFileInput} className="text-xs">
+                      Upload Photo
+                    </Button>
+                    <p className="text-xs text-gray-500 mt-1">PNG, JPG, GIF up to 10MB</p>
+                  </div>
+                </div>
+              )}
+              {errors.patientPhoto && <p className="text-red-500 text-xs mt-1">{errors.patientPhoto}</p>}
+            </div>
+          </div>
+
+          <div className="space-y-2">
             {Object.keys(formData.declarations).map((key, index) => (
-              <div key={index} className="flex items-center space-x-2">
+              <div key={index} className="flex items-start space-x-2">
                 <Checkbox
                   id={key}
                   checked={formData.declarations[key] || false}
@@ -428,9 +539,12 @@ export default function PatientForm() {
                       },
                     })
                   }
+                  className="mt-1"
                 />
-                <Label htmlFor={key} className="text-sm">
-                  {key.replace("declaration", "Declaration ")}
+                <Label htmlFor={key} className="text-xs sm:text-sm">
+                  {key === "declaration1" ? "I confirm that all the information provided is accurate and complete." : 
+                   key === "declaration2" ? "I consent to the processing of my personal data for healthcare purposes." : 
+                   "I acknowledge that I have read and understood the privacy policy."}
                 </Label>
               </div>
             ))}
@@ -443,13 +557,13 @@ export default function PatientForm() {
       </div>
 
       {showThankYou && (
-        <div className="fixed inset-0 bg-[#4ead91] flex items-center justify-center z-50">
-          <div className="bg-white p-8 rounded-lg shadow-lg text-center">
-            <CheckCircle className="w-[72px] h-[72px] text-green-500 mx-auto mb-4" />
+        <div className="fixed inset-0 bg-[#4ead91] bg-opacity-90 flex items-center justify-center z-50 p-4">
+          <div className="bg-white p-6 rounded-lg shadow-lg text-center max-w-xs w-full">
+            <CheckCircle className="w-12 h-12 text-green-500 mx-auto mb-3" />
 
-            <h2 className="text-4xl font-bold mb-2">Thank You!</h2>
-            <p className="text-gray-600 mb-4">Your form has been successfully submitted.</p>
-            <Button onClick={() => setShowThankYou(false)} className="bg-[#4ead91] hover:bg-[#3d9c80] text-white">
+            <h2 className="text-xl font-bold mb-2">Thank You!</h2>
+            <p className="text-gray-600 mb-4 text-sm">Your form has been successfully submitted.</p>
+            <Button onClick={() => setShowThankYou(false)} className="w-full bg-[#4ead91] hover:bg-[#3d9c80] text-white">
               Close
             </Button>
           </div>
@@ -458,4 +572,3 @@ export default function PatientForm() {
     </div>
   )
 }
-

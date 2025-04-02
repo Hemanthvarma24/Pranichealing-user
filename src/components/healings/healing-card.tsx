@@ -1,83 +1,62 @@
-import { Card } from "@/components/ui/card";
-import { Button } from "@/components/ui/button";
+"use client"
+
+import { Card } from "@/components/ui/card"
+import { Button } from "@/components/ui/button"
+
+interface Healing {
+  healingId: string
+  date: string
+  time: string
+  healer: string
+  sessions: number
+}
 
 interface HealingCardProps {
-  healingId: string;
-  date: string;
-  time: string;
-  coordinator: string;
-  name: string;
-  sessions: number;
-  amount: string;
+  healing: Healing
+  onViewDetails: (healingId: string) => void
 }
 
-export function HealingCard({
-  healingId,
-  date,
-  time,
-  coordinator,
-  name,
-  sessions,
-  amount,
-}: HealingCardProps) {
+export function HealingCard({ healing, onViewDetails }: HealingCardProps) {
   // Parse the date string
-  const parsedDate = new Date(date);
-  const month = parsedDate.toLocaleString("default", { month: "short" });
-  const day = parsedDate.getDate();
-  const weekday = parsedDate.toLocaleString("default", { weekday: "short" });
+  const parsedDate = new Date(healing.date)
+  const month = parsedDate.toLocaleString("default", { month: "long" }).toUpperCase()
+  const day = parsedDate.getDate()
+  const weekday = parsedDate.toLocaleString("default", { weekday: "short" }).toUpperCase()
 
   return (
-    <Card className="w-full max-w-md mx-auto shadow-sm rounded-lg border-gray-200 p-6">
-      {/* Top row with Healing ID */}
-      <div className="mb-4">
-        <span className="text-sm font-medium text-gray-900">
-          Healing ID: {healingId}
-        </span>
-      </div>
+    <Card className="w-full shadow-sm rounded-lg border-gray-200 overflow-hidden">
+      <div className="p-4">
+        <div className="text-sm text-gray-600 mb-2">ID-{healing.healingId}</div>
 
-      {/* Main content grid */}
-      <div className="grid grid-cols-3 gap-4 items-center">
-        {/* Left column for Date */}
-        <div className="flex flex-col items-center bg-gray-100 p-5 rounded-lg w-30">
-          <span className="text-sm uppercase text-gray-500">{month}</span>
-          <p className="text-3xl font-bold text-[#4ead91]">{day}</p>
-          <span className="text-sm text-gray-600">{weekday}</span>
-        </div>
+        <div className="grid grid-cols-3 gap-4">
+          {/* Date column */}
+          <div className="flex flex-col items-center">
+            <div className="text-sm text-gray-500">{month}</div>
+            <div className="text-3xl font-bold text-[#4ead91]">{day}</div>
+            <div className="text-sm text-gray-500">{weekday}</div>
+          </div>
 
-        {/* Middle section - 2x2 grid */}
-        <div className="col-span-2 grid grid-cols-2 gap-4">
-          <div className="space-y-1">
-            <span className="text-xs text-gray-500">Coordinator</span>
-            <p className="text-sm font-medium text-gray-900">{coordinator}</p>
+          {/* Middle column */}
+          <div className="flex flex-col justify-center">
+            <div className="text-xs text-gray-500">Timing</div>
+            <div className="text-sm font-semibold">{healing.time}</div>
+           
           </div>
-          <div className="space-y-1">
-            <span className="text-xs text-gray-500">Name</span>
-            <p className="text-sm font-medium text-gray-900">{name}</p>
-          </div>
-          <div className="space-y-1">
-            <span className="text-xs text-gray-500">No. of Sessions</span>
-            <p className="text-base font-semibold text-gray-900">{sessions}</p>
-          </div>
-          <div className="space-y-1">
-            <span className="text-xs text-gray-500">Amount</span>
-            <p className="text-base font-semibold text-[#4ead91]">
-              Rs. {amount}
-            </p>
+
+          {/* Right column */}
+          <div className="flex flex-col items-end justify-center">
+            <Button
+              variant="outline"
+              size="sm"
+              className="text-[#4ead91] border-[#4ead91] hover:bg-[#4ead91] hover:text-white"
+              onClick={() => onViewDetails(healing.healingId)}
+            >
+             View Details
+            </Button>
           </div>
         </div>
-      </div>
-
-      {/* Bottom Left Button */}
-      <div className="mt-6">
-        <Button
-          variant="outline"
-          className="w-full border-[#4ead91] text-[#4ead91] hover:bg-[#4ead91] hover:text-white transition-colors"
-        >
-          View Detail
-        </Button>
       </div>
     </Card>
-  );
+  )
 }
 
-export default HealingCard;
