@@ -1,6 +1,6 @@
 import Link from "next/link";
 import { ChevronRight, ArrowLeft } from "lucide-react";
-import { NavHeader } from "@/components/topnav.tsx";
+import { NavHeader } from "@/components/topnav";
 
 export default function PoliciesPage() {
   const policyItems = [

@@ -9,7 +9,7 @@ export function CoursesSection() {
   const [showMore, setShowMore] = useState(false);
 
   return (
-    <section className="px-6 py-8 max-w-xl mx-auto">
+    <section className="px-6 py-6 max-w-xl mx-auto">
       <div className="flex items-center justify-between mb-2">
         <h2 className="text-lg md:text-2xl font-semibold leading-tight">
           Upcoming <br className="md:hidden" />

@@ -37,7 +37,7 @@ export function HealingSummaryCard({ healingId, name, sessions, totalAmount }: H
               <div className="text-lg font-semibold text-[#4ead91]">₹{totalAmount}</div>
             </div>
           </div>
-          <div className="flex justify-center ">
+          <div className="flex justify-center">
             <Button
               variant="outline"
               size="sm"
@@ -87,4 +87,3 @@ export function HealingSummaryCard({ healingId, name, sessions, totalAmount }: H
     </>
   )
 }
-

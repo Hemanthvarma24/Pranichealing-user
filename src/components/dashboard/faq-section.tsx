@@ -2,7 +2,7 @@ import { Accordion, AccordionContent, AccordionItem, AccordionTrigger } from "@/
 
 export function FAQSection() {
   return (
-    <div className="px-6 md:px-10 lg:px-20 mb-10 max-w-3xl mx-auto">
+    <div className="px-6 md:px-10 lg:px-20 mt-2 mb-10 max-w-3xl mx-auto">
       {/* Section Header */}
       <div className="flex items-center justify-between mb-6">
         <h2 className="text-2xl md:text-3xl font-semibold leading-tight">

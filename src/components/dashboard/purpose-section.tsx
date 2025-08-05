@@ -6,7 +6,7 @@ import { Leaf, Heart } from "lucide-react";
 
 export function PurposeSection() {
   return (
-    <div className="px-4 mb-14 pb-6 overflow-hidden relative">
+    <div className="px-4 mb-4 pb-6 overflow-hidden relative">
       {/* Header */}
       <div className="flex items-center justify-between mb-6">
         <div>

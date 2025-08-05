@@ -1,5 +1,5 @@
 import { BottomNav } from "@/components/fotter";
-import { NavHeader } from "@/components/topnav.tsx";
+import { NavHeader } from "@/components/topnav";
 
 export default function Support() {
   return (

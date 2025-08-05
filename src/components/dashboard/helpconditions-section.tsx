@@ -10,7 +10,7 @@ import Link from "next/link";
 
 export function ConditionsSection() {
   return (
-    <div className="px-6 py-8 bg-[#d5ede5] mb-8 text-center">
+    <div className="px-6 py-8 bg-[#d5ede5] mb-6 text-center">
       <h2 className="text-lg font-medium text-gray-800">
         Conditions for which <br />
         <span className="text-emerald-600 font-semibold text-xl">

@@ -1,5 +1,5 @@
 import { BottomNav } from "@/components/fotter";
-import { NavHeader } from "@/components/topnav.tsx";
+import { NavHeader } from "@/components/topnav";
 import { ArrowLeft } from "lucide-react";
 import Link from "next/link";
 
